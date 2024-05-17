@@ -1,11 +1,6 @@
 pipeline {
     agent any
     stages {
-        stage('SCM') {
-            steps {
-                git url: 'https://github.com/foo/bar.git'
-            }
-        }
         stage('build && SonarQube analysis') {
             steps {
                 withSonarQubeEnv() {
