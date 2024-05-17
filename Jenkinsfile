@@ -5,7 +5,7 @@ node {
   
   stage('SonarQube Analysis') {
     def mvn = tool 'Default Maven'
-    withSonarQubeEnv('SonarQube') { // Assumes 'SonarQube' is the name of your SonarQube installation in Jenkins
+    withSonarQubeEnv() { 
       sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=qualitygate -Dsonar.projectName='qualitygate'"
     }
   }
