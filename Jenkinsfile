@@ -1,25 +1,29 @@
-node {
-  stage('SCM') {
-    checkout scm
-  }
-  
-  stage('SonarQube Analysis') {
-    def mvn = tool 'Default Maven'
-    withSonarQubeEnv() { 
-      sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=qualitygate -Dsonar.projectName='qualitygate'"
+pipeline {
+    agent any
+    stages {
+        stage('SCM') {
+            steps {
+                git url: 'https://github.com/foo/bar.git'
+            }
+        }
+        stage('build && SonarQube analysis') {
+            steps {
+                withSonarQubeEnv() {
+                    // Optionally use a Maven environment you've configured already
+                    withMaven(maven:'Default Maven') {
+                        sh 'mvn clean package sonar:sonar'
+                    }
+                }
+            }
+        }
+        stage("Quality Gate") {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
+                    // true = set pipeline to UNSTABLE, false = don't
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
     }
-  }
-  
-  stage('Quality Gate') {
-    timeout(time: 3, unit: 'MINUTES') { // Just in case something goes wrong, pipeline will be killed after a timeout
-      def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
-      if (qg.status != 'OK') {
-        error "Pipeline aborted due to quality gate failure: ${qg.status}"
-      }
-    }
-  }
-  
-  stage('Final Stage') {
-    echo 'will this pipeline fail'
-  }
 }
