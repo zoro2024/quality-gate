@@ -1,12 +1,12 @@
 node {
-    stage('SCM') {
-        checkout scm
+  stage('SCM') {
+    checkout scm
+  }
+  
+  stage('SonarQube Analysis') {
+    def mvn = tool 'Default Maven';
+    withSonarQubeEnv() {
+      sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=quality-gate -Dsonar.projectName='quality-gate'"
     }
-    
-    stage('SonarQube Analysis') {
-        def mvnHome = tool 'Default Maven'
-        withSonarQubeEnv('SonarQube') {
-            sh "${mvnHome}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=quality-gate -Dsonar.projectName='quality-gate'"
-        }
-    }
+  }
 }
