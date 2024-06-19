@@ -1,22 +1,12 @@
-pipeline {
-    agent any
+node {
+    stage('SCM') {
+        checkout scm
+    }
     
-    stages {
-        stage('SCM Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-        
-        stage('SonarQube Analysis') {
-            environment {
-                scannerHome = tool 'Default Maven'
-            }
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh "${scannerHome}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=quality-gate -Dsonar.projectName='quality-gate'"
-                }
-            }
+    stage('SonarQube Analysis') {
+        def mvnHome = tool 'Default Maven'
+        withSonarQubeEnv('SonarQube') {
+            sh "${mvnHome}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=quality-gate -Dsonar.projectName='quality-gate'"
         }
     }
 }
