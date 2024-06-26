@@ -1,25 +1,30 @@
-node {
-  stage('SCM') {
-    checkout scm
-  }
-  
-  stage('SonarQube Analysis') {
-    def mvn = tool 'Default Maven';
-    withSonarQubeEnv() {
-      sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=poc -Dsonar.projectName='poc'"
-    }
-  }
-
-  stage('Quality Gate') {
-    timeout(time: 1, unit: 'MINUTES') { // Just in case something goes wrong, pipeline will be killed after a timeout
-      def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
-      if (qg.status != 'OK') {
-        error "Pipeline aborted due to quality gate failure: ${qg.status}"
-      }
-    }
-  }
-
-  stage('Post-Quality Gate') {
-    echo 'checking will this pipeline fail due to quality gate failure'
-  }
-}
+stage('SonarQube Code Analysis') {
+            steps {
+                dir("${WORKSPACE}"){
+                // Run SonarQube analysis for java
+                script {
+                    def scannerHome = tool name: 'scanner-name', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                    withSonarQubeEnv('sonar') {
+                        sh "echo $pwd"
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
+                }
+            }
+            }
+       }
+       stage("SonarQube Quality Gate Check") {
+            steps {
+                script {
+                def qualityGate = waitForQualityGate()
+                    
+                    if (qualityGate.status != 'OK') {
+                        echo "${qualityGate.status}"
+                        error "Quality Gate failed: ${qualityGateStatus}"
+                    }
+                    else {
+                        echo "${qualityGate.status}"
+                        echo "SonarQube Quality Gates Passed"
+                    }
+                }
+            }
+        }
