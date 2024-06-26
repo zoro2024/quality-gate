@@ -8,7 +8,7 @@ node {
   stage('SonarQube Analysis') {
     echo 'Starting SonarQube Analysis stage...'
     def mvn = tool 'Default Maven';
-    withSonarQubeEnv('SonarQube') {
+    withSonarQubeEnv('Sonar') {
       sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=poc -Dsonar.projectName='poc'"
     }
     echo 'Finished SonarQube Analysis stage.'
