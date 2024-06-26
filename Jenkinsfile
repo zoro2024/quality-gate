@@ -1,30 +1,35 @@
-stage('SonarQube Code Analysis') {
+pipeline {
+    agent any
+    
+    stages {
+        stage('SonarQube Code Analysis') {
             steps {
-                dir("${WORKSPACE}"){
-                // Run SonarQube analysis for java
-                script {
-                    def scannerHome = tool name: 'scanner-name', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                    withSonarQubeEnv('sonar') {
-                        sh "echo $pwd"
-                        sh "${scannerHome}/bin/sonar-scanner"
+                dir("${WORKSPACE}") {
+                    script {
+                        def scannerHome = tool name: 'scanner-name', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                        withSonarQubeEnv('sonar') {
+                            sh "echo \$PWD"  // Ensure correct shell variable for current directory
+                            sh "${scannerHome}/bin/sonar-scanner"
+                        }
                     }
                 }
             }
-            }
-       }
-       stage("SonarQube Quality Gate Check") {
+        }
+        
+        stage("SonarQube Quality Gate Check") {
             steps {
                 script {
-                def qualityGate = waitForQualityGate()
+                    def qualityGate = waitForQualityGate()
                     
                     if (qualityGate.status != 'OK') {
                         echo "${qualityGate.status}"
-                        error "Quality Gate failed: ${qualityGateStatus}"
-                    }
-                    else {
+                        error "Quality Gate failed: ${qualityGate.status}"  // Corrected variable name
+                    } else {
                         echo "${qualityGate.status}"
                         echo "SonarQube Quality Gates Passed"
                     }
                 }
             }
         }
+    }
+}
