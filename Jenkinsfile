@@ -6,7 +6,7 @@ node {
     stage('SonarQube Analysis') {
         def mvnHome = tool 'Default Maven'
         withSonarQubeEnv() {
-            sh "${mvnHome}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=quality-gate. -Dsonar.projectName='quality-gate.'"
+            sh "${mvnHome}/bin/mvn clean verify sonar:sonar"
         }
     }
 
