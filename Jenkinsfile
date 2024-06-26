@@ -2,22 +2,21 @@ node {
   stage('SCM') {
     checkout scm
   }
-  
   stage('SonarQube Analysis') {
     def mvn = tool 'Default Maven';
-    withSonarQubeEnv('sonar') {
+    withSonarQubeEnv() {
       sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=quality-gate -Dsonar.projectName='quality-gate'"
     }
   }
-  
   stage('Quality Gate') {
     timeout(time: 1, unit: 'HOURS') {
-      waitForQualityGate(abortPipeline: true)
+      def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
+      if (qg.status != 'OK') {
+        error "Pipeline aborted due to quality gate failure: ${qg.status}"
+      }
     }
   }
-  
-  stage('Build') {
-    // Your build steps go here
-    echo 'Build stage - success'
+  stage('Post-Quality Gate') {
+    echo 'checking will this pipeline fail due to quality gate failure'
   }
 }
