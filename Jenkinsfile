@@ -2,13 +2,13 @@ node {
   stage('SCM') {
     checkout scm
   }
-  
   stage('SonarQube Analysis') {
     def mvn = tool 'Default Maven';
     withSonarQubeEnv() {
-      sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=quality-gate -Dsonar.projectName='quality-gate'"
+      sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=quality-gate. -Dsonar.projectName='quality-gate.'"
     }
   }
+}
 
   stage('Quality Gate') {
     timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
