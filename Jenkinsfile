@@ -17,6 +17,6 @@ node {
     }
   }
   stage('Post-Quality Gate') {
-    echo 'checking will this pipeline fail due to quality gate failure'
+    echo 'Quality gate passed'
   }
 }
